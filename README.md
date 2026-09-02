@@ -1,68 +1,101 @@
 # MCP Server for Bilibili Video Info
 
 [![smithery badge](https://smithery.ai/badge/@lesir831/bilibili-video-info-mcp)](https://smithery.ai/server/@lesir831/bilibili-video-info-mcp)
-[![English](https://img.shields.io/badge/language-English-blue.svg)](./README.md) [![中文](https://img.shields.io/badge/language-中文-red.svg)](./README.zh.md)
 
-A Bilibili MCP Server that can retrieve subtitles, danmaku (bullet comments), and comments information from videos using the video URL.
+A Model Context Protocol (MCP) server that empowers English AI assistants and LLMs to retrieve comprehensive information from Bilibili videos, including video metadata, full transcripts and subtitles (with English language labels), danmaku (bullet comments), and user comments.
 
-## Usage
+---
 
-This MCP server supports three transport methods:
-1. **stdio** 
+## Authentication
+
+Authentication is optional for many public videos, but recommended for higher rate limits, full subtitles, and avoiding Bilibili anti-bot rate limits.
+
+### 1. Browser Login (Recommended)
+You can simply tell your AI assistant: *"Log in to Bilibili"* or call `login_bilibili`. It will:
+1. Open a secure local authentication page in your browser (`http://127.0.0.1:<port>/auth/<token>`).
+2. Offer three convenient options:
+   - **QR Code Scan** with the Bilibili mobile app (fastest and easiest).
+   - **Auto-Detect** session cookies directly from your local browsers (Chrome, Safari, Edge, Firefox, Brave, Arc).
+   - **Manual Input** to paste your `SESSDATA` cookie.
+3. Automatically save the session locally (`~/.config/bilibili-video-info-mcp/session.json`) for all future requests.
+
+### 2. Environment Variable (Alternative)
+You can also supply `SESSDATA` directly via environment variables:
+```bash
+export SESSDATA="your_sessdata_value"
+```
+
+---
+
+## Client Setup
+
+### Claude Desktop
+Add to your `claude_desktop_config.json`:
 ```json
 {
-    "mcpServers": {
-        "bilibili-video-info-mcp": {
-            "command": "uvx",
-            "args": [
-                "bilibili-video-info-mcp"
-            ],
-            "env": {
-                "SESSDATA": "your valid sessdata"
-            }
-        }
+  "mcpServers": {
+    "bilibili-video-info-mcp": {
+      "command": "uvx",
+      "args": ["bilibili-video-info-mcp"]
     }
+  }
 }
 ```
 
-2. **sse** (Server-Sent Events)
-run bilibili-video-info-mcp in sse mode
-``` bash
+### Cursor / Continue / Other MCP Clients
+- **Command**: `uvx bilibili-video-info-mcp`
+- **Transport**: `stdio`
+
+### Server-Sent Events (SSE) Mode
+```bash
 cp .env.example .env
 uvx run --env .env bilibili-video-info-mcp sse
 ```
-then config your mcp client
+Client configuration:
 ```json
 {
-    "mcpServers": {
-        "bilibili-video-info-mcp": {
-            "url": "http://{your.ip.address}:$PORT$/sse"
-        }
+  "mcpServers": {
+    "bilibili-video-info-mcp": {
+      "url": "http://127.0.0.1:$PORT$/sse"
     }
+  }
 }
 ```
 
-3. **streamable-http** (HTTP Streaming)
-run bilibili-video-info-mcp in streamable-http mode
-``` bash
+### Streamable HTTP Mode
+```bash
 cp .env.example .env
 uvx run --env .env bilibili-video-info-mcp streamable-http
 ```
-then config your mcp client
+Client configuration:
 ```json
 {
-    "mcpServers": {
-        "bilibili-video-info-mcp": {
-            "url": "http://{your.ip.address}:$PORT$/mcp"
-            }
-        }
+  "mcpServers": {
+    "bilibili-video-info-mcp": {
+      "url": "http://127.0.0.1:$PORT$/mcp"
     }
+  }
 }
 ```
 
+---
+
 ## MCP Tools List
 
-### 1. Get Video Subtitles
+### 1. `get_video_info`
+Fetches complete metadata for a Bilibili video, including title, description, uploader profile, duration, publication date, categories, statistics (views, likes, coins, favorites, comments, danmaku), and multi-part episode listings.
+
+```json
+{
+  "name": "get_video_info",
+  "arguments": {
+    "url": "https://www.bilibili.com/video/BV1x341177NN"
+  }
+}
+```
+
+### 2. `get_subtitles`
+Retrieves subtitles and transcripts. Returns the full continuous transcript text, timestamped line segments, language codes, and human-readable English language names (e.g. `Chinese (Simplified)`, `Chinese (AI Auto-generated)`, `English`).
 
 ```json
 {
@@ -73,7 +106,8 @@ then config your mcp client
 }
 ```
 
-### 2. Get Video Danmaku (Bullet Comments)
+### 3. `get_danmaku`
+Fetches bullet comments (on-screen scrolling viewer reactions) from a video.
 
 ```json
 {
@@ -84,7 +118,8 @@ then config your mcp client
 }
 ```
 
-### 3. Get Video Comments
+### 4. `get_comments`
+Retrieves top popular comments, usernames, and like counts from a video.
 
 ```json
 {
@@ -95,26 +130,47 @@ then config your mcp client
 }
 ```
 
-## FAQ
-
-### 1. How to find SESSDATA?
-
-1. Log in to the Bilibili website
-2. Open browser developer tools (F12)
-3. Go to Application/Storage -> Cookies
-4. Find the value corresponding to SESSDATA
-
-### 2. Error "SESSDATA environment variable is required"
-
-Make sure you have set the environment variable:
-
-```bash
-export SESSDATA="your SESSDATA value"
+### 5. `login_bilibili`
+Launches the local browser authentication page to scan a QR code or auto-detect cookies.
+```json
+{
+  "name": "login_bilibili",
+  "arguments": {
+    "timeout": 300
+  }
+}
 ```
 
-### 3. What video link formats are supported?
+### 6. `get_login_status`
+Checks if a valid Bilibili session is active and returns username and VIP status.
+```json
+{
+  "name": "get_login_status",
+  "arguments": {}
+}
+```
 
+### 7. `logout_bilibili`
+Logs out and deletes the stored session file.
+```json
+{
+  "name": "logout_bilibili",
+  "arguments": {}
+}
+```
+
+---
+
+## FAQ
+
+### 1. Do I need to be logged in?
+Many public videos can return danmaku, comments, and basic info without logging in. However, Bilibili frequently enforces anti-bot verification (HTTP 412) on unauthenticated requests. Logging in with `login_bilibili` prevents rate limits and gives access to full subtitles and HD streams.
+
+### 2. Where is my login session stored?
+Sessions captured via browser login are saved locally on your machine at `~/.config/bilibili-video-info-mcp/session.json`. They are strictly stored on your device and only sent directly to official Bilibili API endpoints.
+
+### 3. What video link formats are supported?
 Standard Bilibili video links are supported, such as:
-- https://www.bilibili.com/video/BV1x341177NN
-- https://b23.tv/xxxxx (short links)
-- Any link containing a BV number
+- `https://www.bilibili.com/video/BV1x341177NN`
+- `https://b23.tv/xxxxx` (short links)
+- Any URL containing a Bilibili `BV...` identifier

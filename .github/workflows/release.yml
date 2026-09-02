@@ -18,7 +18,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 获取完整历史以便生成完整的commit log
+          fetch-depth: 0  # Fetch full history to generate complete commit log
           token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Set Git User
@@ -28,7 +28,7 @@ jobs:
       
       - name: Update Version Number
         run: |
-          # 使用sed更新pyproject.toml中的版本号
+          # Use sed to update version number in pyproject.toml
           sed -i "s/version = \"[0-9]*\.[0-9]*\.[0-9]*\"/version = \"${{ github.event.inputs.version }}\"/g" pyproject.toml
           echo "Version updated to ${{ github.event.inputs.version }}"
       
@@ -40,10 +40,10 @@ jobs:
       - name: Collect Commit Messages
         id: get_commits
         run: |
-          # 获取最新的tag
+          # Get the latest tag
           latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           
-          # 如果没有找到tag，则收集所有的commit，排除merge提交
+          # If no tag is found, collect all commits excluding merges
           if [ -z "$latest_tag" ]; then
             echo "No previous tag found, collecting all commits (excluding merges)"
             changelog=$(git log --pretty=format:"* %s (%h)" --reverse --no-merges)
@@ -52,10 +52,10 @@ jobs:
             changelog=$(git log ${latest_tag}..HEAD --pretty=format:"* %s (%h)" --reverse --no-merges)
           fi
           
-          # 保存changelog到文件
+          # Save changelog to file
           echo "$changelog" > changelog.md
           
-          # 使用环境文件语法设置输出变量
+          # Set output variable using environment file syntax
           echo "changelog<<EOL" >> "$GITHUB_OUTPUT"
           echo "$changelog" >> "$GITHUB_OUTPUT"
           echo "EOL" >> "$GITHUB_OUTPUT"
@@ -91,7 +91,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          ref: v${{ github.event.inputs.version }}  # 使用新创建的tag
+          ref: v${{ github.event.inputs.version }}  # Use newly created tag
       
       - name: Setup Python Environment
         uses: actions/setup-python@v4
