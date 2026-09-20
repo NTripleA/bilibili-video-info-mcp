@@ -8,7 +8,7 @@ A Model Context Protocol (MCP) server that empowers English AI assistants and LL
 
 ## Authentication
 
-Authentication is optional for many public videos, but recommended for higher rate limits, full subtitles, and avoiding Bilibili anti-bot rate limits.
+Authentication is required: Bilibili's video endpoints reject unauthenticated requests with an anti-bot check (HTTP 412). Logging in also unlocks full subtitles and higher rate limits.
 
 ### 1. Browser Login (Recommended)
 You can simply tell your AI assistant: *"Log in to Bilibili"* or call `login_bilibili`. It will:
@@ -20,9 +20,11 @@ You can simply tell your AI assistant: *"Log in to Bilibili"* or call `login_bil
 3. Automatically save the session locally (`~/.config/bilibili-video-info-mcp/session.json`) for all future requests.
 
 ### 2. Environment Variable (Alternative)
-You can also supply `SESSDATA` directly via environment variables:
+You can also supply the session cookies directly via environment variables:
 ```bash
 export SESSDATA="your_sessdata_value"
+export DedeUserID="your_numeric_user_id"   # optional; looked up automatically if omitted
+export BILI_JCT="your_bili_jct_value"      # optional
 ```
 
 ---
@@ -164,7 +166,7 @@ Logs out and deletes the stored session file.
 ## FAQ
 
 ### 1. Do I need to be logged in?
-Many public videos can return danmaku, comments, and basic info without logging in. However, Bilibili frequently enforces anti-bot verification (HTTP 412) on unauthenticated requests. Logging in with `login_bilibili` prevents rate limits and gives access to full subtitles and HD streams.
+Yes, in practice. Bilibili's video metadata endpoint (which every tool calls first) enforces an anti-bot check (HTTP 412) unless the request carries a logged-in `DedeUserID` cookie alongside `SESSDATA`. Logging in with `login_bilibili` captures both automatically. If you still see HTTP 412 *after* logging in, the tools now say so explicitly: that is Bilibili risk control rejecting an authenticated request (usually rate limiting on the IP or account), so check `get_login_status` first and only re-run `login_bilibili` if it reports the session as expired.
 
 ### 2. Where is my login session stored?
 Sessions captured via browser login are saved locally on your machine at `~/.config/bilibili-video-info-mcp/session.json`. They are strictly stored on your device and only sent directly to official Bilibili API endpoints.

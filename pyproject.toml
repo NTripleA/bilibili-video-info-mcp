@@ -9,11 +9,18 @@ description = "An MCP server to fetch Bilibili video information like subtitles,
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "mcp[cli]>=1.11.0",
+    # server.py uses mcp.server.fastmcp.FastMCP, which mcp 2.x renamed to MCPServer.
+    # Keep the ceiling until the server is migrated, or fresh installs break on import.
+    "mcp[cli]>=1.11.0,<2",
     "requests",
 ]
 authors = [
     {name = "lesir"}
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
 ]
 
 [project.scripts]
@@ -21,3 +28,6 @@ bilibili-video-info-mcp = "bilibili_video_info_mcp.__main__:main"
 
 [tool.setuptools]
 packages = ["bilibili_video_info_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
