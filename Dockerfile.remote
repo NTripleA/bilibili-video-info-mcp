@@ -1,0 +1,6 @@
+FROM bilibili-video-info-mcp:6d516b4
+
+COPY remote_server.py /app/remote_server.py
+
+ENTRYPOINT ["python", "/app/remote_server.py"]
+CMD []
