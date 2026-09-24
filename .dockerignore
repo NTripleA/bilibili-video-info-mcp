@@ -1,92 +1,100 @@
-# Python build artifacts and caches
-__pycache__/
+# Exclude local state from the Docker build context.
+.git
+node_modules
+.venv
+__pycache__
 *.pyc
-*.pyo
-*.pyd
-
-# Virtual environments
-.env
-env/
-venv/
-.venv/
-
-# Distribution / packaging
-.eggs/
-*.egg-info/
-build/
-dist/
-
-# Log files
 *.log
-
-# macOS system files
 .DS_Store
-.AppleDouble
-.LSOverride
-.Spotlight-V100
-.Trashes
-._*
-.fseventsd
-
-# VSCode editor configuration
-.vscode/
-*.code-workspace
-
-# JetBrains IDEs
-.idea/
-
-# Python testing and coverage
-.pytest_cache/
-.coverage
-htmlcov/
 
 # Private environment files; keep sanitized templates shareable.
 .env
+**/.env
 .env.*
+**/.env.*
 !.env.example
+!**/.env.example
 !.env.*.example
+!**/.env.*.example
 !.env.sample
+!**/.env.sample
 !.env.template
+!**/.env.template
 .dev.vars
+**/.dev.vars
 .dev.vars.*
+**/.dev.vars.*
 
 # Local MCP client configuration may contain credentials.
 .mcp.json
+**/.mcp.json
 .mcp.local.json
+**/.mcp.local.json
 claude_desktop_config.json
+**/claude_desktop_config.json
 
 # Credentials, OAuth clients, cookies, and runtime sessions.
 credentials.json
+**/credentials.json
 credentials.*.json
+**/credentials.*.json
 client_secret*.json
+**/client_secret*.json
 client_secrets*.json
+**/client_secrets*.json
 service-account*.json
+**/service-account*.json
 service_account*.json
+**/service_account*.json
 token.json
+**/token.json
 token.*.json
+**/token.*.json
 *.token.json
+**/*.token.json
 tokens.json
+**/tokens.json
 session.json
+**/session.json
 session.*.json
+**/session.*.json
 session.pickle
+**/session.pickle
 session.pkl
+**/session.pkl
 cookies.json
+**/cookies.json
 cookies.txt
+**/cookies.txt
 .cookies
+**/.cookies
 .git-credentials
+**/.git-credentials
 secrets/
+**/secrets/
 .secrets/
+**/.secrets/
 
 # Local Cloudflare configuration and private key material.
 .cloudflared/
+**/.cloudflared/
 *.pem
+**/*.pem
 *.key
+**/*.key
 *.p12
+**/*.p12
 *.pfx
+**/*.pfx
 id_rsa
+**/id_rsa
 id_ed25519
+**/id_ed25519
 
 # Legacy BiliBili cookie/session files.
 .sessdata
+**/.sessdata
 .sessdata.*
+**/.sessdata.*
 .bilibili-video-info-mcp/
+**/.bilibili-video-info-mcp/

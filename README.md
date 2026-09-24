@@ -82,6 +82,27 @@ Client configuration:
 
 ---
 
+### Remote container entry point
+
+`remote_server.py` (also used by `Dockerfile.remote`) reads deployment-specific
+allowlists from the environment. Set these before starting an updated remote
+deployment:
+
+```bash
+export MCP_ALLOWED_HOSTS="mcp.example.com,mcp.example.com:443"
+export MCP_ALLOWED_ORIGINS="https://mcp.example.com"
+export PORT=8000
+python remote_server.py
+```
+
+Replace the example endpoint with your deployment's Host header and browser
+origin. Values are comma-separated; whitespace and empty entries are ignored.
+Loopback hosts/origins remain allowed, and DNS rebinding protection stays enabled.
+An unlisted remote host or browser origin is rejected. The script does not load
+`.env` automatically: export the variables or pass a private environment file to
+your container runtime. Keep real cookies, `.sessdata`, and deployment settings
+out of source control and container build contexts.
+
 ## MCP Tools List
 
 ### 1. `get_video_info`
